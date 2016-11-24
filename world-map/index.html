@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+	text {
+		font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+		font-size: 9px;
+	}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script>
+
+
+	var width = 1280,
+    	height = 960;
+
+	var svg = d3.select("body").append("svg")
+    	.attr("width", width)
+    	.attr("height", height);
+
+    var color = d3.scale.category20b();	
+
+
+
+	d3.json("world.json", function(error, world) {
+  		if (error) return console.error(error);
+  		
+  		// console.log(world);
+
+  		var subunits = topojson.feature(world, world.objects.subunits);
+
+    	var projection = d3.geo.mercator()
+    		.scale(200)
+    		.translate([width / 2, height / 2]);
+	
+    	var path = d3.geo.path()
+  		  .projection(projection);	
+
+  		svg.append("path")
+   			.datum(subunits)
+    		.attr("d", path);
+
+
+
+    	svg.selectAll(".subunit")
+    		.data(topojson.feature(world, world.objects.subunits).features)
+ 			.enter().append("path")
+ 			.attr("fill", function(d){ return color(d.id)})
+    		.attr("class", function(d) { return "subunit " + d.id; })
+    			.attr("d", path);	
+			
+    	svg.append("path")
+    		.datum(topojson.feature(world, world.objects.places))
+    		.attr("d", path.pointRadius(2))
+    		.attr("class", "place");
+
+    	svg.selectAll(".place-label")
+  			  .data(topojson.feature(world, world.objects.places).features)
+  			.enter().append("text")
+  			  .attr("class", "place-label")
+  			  .attr("transform", function(d) { return "translate(" + projection(d.geometry.coordinates) + ")"; })
+  			  .attr("dy", ".35em")
+  			  .attr("dx", ".35em")
+  			  .text(function(d) { return d.properties.name; });
+
+		});
+
+		
+
+
+
+</script>

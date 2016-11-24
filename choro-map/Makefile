@@ -11,3 +11,22 @@ unemployment.tsv:
   		  | dsv2dsv -r ' ') \
   		| csv2tsv \
   		> unemployment.tsv
+
+build/ne_10m_populated_places.zip:
+	curl -o $@ http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
+
+build/ne_10m_admin_0_map_subunits.zip:
+	curl -o $@ http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_map_subunits.zip
+
+build/ne_10m_admin_0_map_subunits.shp: build/ne_10m_admin_0_map_subunits.zip
+	unzip -od $(dir $@) $<
+	touch $@
+
+build/ne_10m_populated_places.shp: build/ne_10m_populated_places.zip
+	unzip -od $(dir $@) $<
+	touch $@	
+
+ogr2ogr \
+  -f GeoJSON \
+  subunits.json \
+  ne_10m_admin_0_map_subunits.shp
